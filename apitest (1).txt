@@ -1,0 +1,29 @@
+/// <reference types="Cypress" />
+ 
+describe('security use case', function() 
+{
+ 
+it('My FirstTest case',function() {
+ 
+    cy.visit("https://rahulshettyacademy.com/angularAppdemo/");
+ 
+    cy.intercept('GET','https://rahulshettyacademy.com/Library/GetBook.php?AuthorName=shetty',
+    (req)=>
+    {
+    req.url="https://rahulshettyacademy.com/Library/GetBook.php?AuthorName=malhotra" //change the url
+ 
+    req.continue((res)=>
+    {
+       // expect(res.statusCode).to.equal(403) //expect the status code
+    })
+ }
+ ).as("dummyUrl") //alias name
+ 
+ cy.get("button[class='btn btn-primary']").click() //click on button then only intercept will work
+ cy.wait('@dummyUrl')
+ 
+})
+ 
+})
+ 
+ 

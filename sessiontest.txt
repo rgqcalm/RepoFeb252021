@@ -1,0 +1,79 @@
+/// <reference types="Cypress" />
+//import neatCSV from 'neat-csv';
+const neatCSV = require('neat-csv')
+
+let productName
+
+describe('jwt session',()=>{  //skipping login and directly logging in through local storage
+ 
+    it('It is logged in through local storage',()=>{
+        cy.LoginAPI().then(function()
+            {
+              cy.visit("https://rahulshettyacademy.com/client", 
+                {
+
+                    onBeforeLoad: function(window)  //before loading the page
+                    {
+                        window.localStorage.setItem('token',Cypress.env('token')) //set the token in local storage
+                    }
+                   
+            })
+        })
+        cy.get(".card-body b").eq(1).then(function(ele)
+
+        {
+  
+        productName =  ele.text(); //get the product name
+  
+        })
+  
+      cy.get(".card-body button:last-of-type").eq(1).click();
+  
+      cy.get("[routerlink*='cart']").click();
+  
+      cy.contains("Checkout").click();
+  
+      cy.get("[placeholder*='Country']").type("ind")
+  
+      cy.get('.ta-results button').each(($e1, index, $list) => {
+  
+  
+  
+        if($e1.text()===" India")
+  
+        {
+  
+            cy.wrap($e1).click()
+  
+        }
+  
+    })
+  
+      cy.get(".action__submit").click(); 
+  
+      cy.wait(2000)
+  
+      //cy.get(".order-summary button").click();
+      cy.contains('Click To Download Order Details in CSV').click()
+  
+     
+  // csv file download and read
+    cy.readFile(Cypress.config("fileServerFolder")+"/cypress/downloads/order-invoice_siddhart.chakravarty.csv") //read the file
+  
+    .then(async(text)=> 
+  
+    {
+  
+      const csv =  await neatCSV(text) //convert the csv to json
+  
+      console.log(csv)
+  
+      const actualProductCSV = csv[0]["Product Name"]
+  
+      expect(productName).to.equal(actualProductCSV)
+  
+  
+    })
+    
+})
+})

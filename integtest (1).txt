@@ -1,0 +1,32 @@
+/// <reference types="Cypress" />
+ 
+describe('My First Test Suite', function() //get the data from the response,when browser is available,not pure API testing
+{
+ 
+it('My FirstTest case',function() {
+ 
+    cy.visit("https://rahulshettyacademy.com/angularAppdemo/");
+ 
+    cy.intercept({     //intercept the request and response
+        method : 'GET',
+        url : 'https://rahulshettyacademy.com/Library/GetBook.php?AuthorName=shetty'
+    },
+ 
+     {
+         statusCode : 200,
+         body : [{
+                "book_name": "RestAssured with Java",
+                "isbn": "RSU",
+                "aisle": "2301"    }]
+          
+     }).as('bookretrievals') //alias name
+     
+     cy.get("button[class='btn btn-primary']").click()
+     cy.wait('@bookretrievals').then(({request,response})=> //promise resolve
+     {
+         cy.get('tr').should('have.length',response.body.length+1) //response.body.length+1 because we have 1 header row
+      
+     })
+     cy.get('p').should('have.text','Oops only 1 Book available')
+    })
+})
